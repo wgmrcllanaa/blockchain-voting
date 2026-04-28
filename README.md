@@ -9,8 +9,7 @@ Secure blockchain voting system for the Adamson Computer Science Society.
 ```
 blockchain-voting/
 ├── blockchain/       ← Solidity contract + Hardhat
-├── votechain/        ← Next.js app (frontend + backend + Prisma)
-└── frontend/         ← Archived starter app; not used by VoteChain
+└── votechain/        ← Next.js app (frontend + backend + Prisma)
 ```
 
 ---
