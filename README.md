@@ -67,6 +67,16 @@ Install dependencies for the web app folder:
 ```bash
 cd ../votechain
 npm install
+npm run db:generate
+```
+
+This generates the Prisma client used by the admin API routes.
+
+If you are on Windows PowerShell and `npm` is blocked by execution policy, use:
+
+```bash
+npm.cmd install
+npm.cmd run db:generate
 ```
 
 ## 4. Set Up Supabase

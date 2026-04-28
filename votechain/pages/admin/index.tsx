@@ -227,6 +227,51 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
     }
   };
 
+  const handleReset = async (reg: PendingRegistration) => {
+    if (!window.confirm(
+      `Reset ${reg.student.name}'s registration?\n\nStudent ID: ${reg.student.studentId}\nWallet: ${reg.walletAddress}\nStatus: ${reg.status}\n\nThis removes the current registration so the student can register again with a different wallet.`
+    )) return;
+
+    setActionLoading(reg.id);
+    setNotice("");
+    try {
+      let chainMessage = "";
+
+      if (reg.status === "approved") {
+        if (!adminWallet) {
+          alert("Please connect your admin wallet first.");
+          return;
+        }
+
+        const contract = await getAdminSignerContract();
+        const [isWhitelisted, hasVoted] = await Promise.all([
+          contract.isWhitelisted(reg.walletAddress),
+          contract.hasVoted(reg.walletAddress),
+        ]);
+
+        if (hasVoted) {
+          alert("This wallet has already voted. Its registration cannot be reset.");
+          return;
+        }
+
+        if (isWhitelisted) {
+          const tx = await contract.revokeWhitelist(reg.walletAddress);
+          await tx.wait();
+          chainMessage = " Whitelist access was revoked on-chain.";
+        }
+      }
+
+      const { data } = await axios.post("/api/admin/reset-registration", { registrationId: reg.id });
+      setNotice(`Reset ${data.data.studentName}'s registration.${chainMessage} They can now register again with a new wallet.`);
+      await fetchRegistrations();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to reset registration.";
+      alert(msg.includes("user rejected") ? "Transaction rejected." : `Error: ${msg}`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <div className="card">
       <div className="card-header flex items-center justify-between">
@@ -282,10 +327,39 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
                       >
                         Reject
                       </button>
+                      <button
+                        onClick={() => handleReset(reg)}
+                        disabled={actionLoading === reg.id}
+                        className="btn-outline text-xs py-1.5 px-3"
+                      >
+                        Reset
+                      </button>
                     </>
                   )}
-                  {reg.status === "approved" && <span className="badge-approved">Approved</span>}
-                  {reg.status === "rejected" && <span className="badge-rejected">Rejected</span>}
+                  {reg.status === "approved" && (
+                    <>
+                      <span className="badge-approved">Approved</span>
+                      <button
+                        onClick={() => handleReset(reg)}
+                        disabled={actionLoading === reg.id}
+                        className="btn-outline text-xs py-1.5 px-3"
+                      >
+                        Reset
+                      </button>
+                    </>
+                  )}
+                  {reg.status === "rejected" && (
+                    <>
+                      <span className="badge-rejected">Rejected</span>
+                      <button
+                        onClick={() => handleReset(reg)}
+                        disabled={actionLoading === reg.id}
+                        className="btn-outline text-xs py-1.5 px-3"
+                      >
+                        Reset
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}

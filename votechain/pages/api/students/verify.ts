@@ -49,11 +49,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
     if (status === "approved") {
+      const approvedWallet = student.registration.walletAddress;
       return res.status(409).json({
         success: false,
-        error: "Your wallet is already approved. You can proceed to vote.",
+        error: `This student is already approved for wallet ${approvedWallet}. Use that exact wallet in MetaMask to vote. If you need to use a different wallet, ask the admin to reset this registration first.`,
         status: "approved",
-        walletAddress: student.registration.walletAddress,
+        walletAddress: approvedWallet,
       });
     }
     if (status === "rejected") {
