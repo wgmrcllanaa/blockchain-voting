@@ -42,13 +42,48 @@ export const CONTRACT_ABI = [
 ];
 
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
+export const ADMIN_ADDRESS = process.env.NEXT_PUBLIC_ADMIN_ADDRESS || "";
+const CHAIN_ID_DECIMAL = Number(process.env.NEXT_PUBLIC_CHAIN_ID || "31337");
+const CHAIN_ID_HEX = `0x${CHAIN_ID_DECIMAL.toString(16)}`;
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545";
 
 // ─── Get read-only provider (no wallet needed) ──────────────────────────────
 export function getReadOnlyContract(): Contract {
-  const provider = new ethers.JsonRpcProvider(
-    process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545"
-  );
+  const provider = new ethers.JsonRpcProvider(RPC_URL);
   return new Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+}
+
+async function ensureHardhatNetwork() {
+  if (typeof window === "undefined" || !window.ethereum) {
+    throw new Error("MetaMask is not installed");
+  }
+
+  const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
+  if (currentChainId === CHAIN_ID_HEX) return;
+
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: CHAIN_ID_HEX }],
+    });
+  } catch (error) {
+    const switchError = error as { code?: number };
+    if (switchError.code !== 4902) {
+      throw new Error("Please switch MetaMask to the Hardhat Local network.");
+    }
+
+    await window.ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: CHAIN_ID_HEX,
+          chainName: "Hardhat Local",
+          nativeCurrency: { name: "Ethereum", symbol: "ETH", decimals: 18 },
+          rpcUrls: [RPC_URL],
+        },
+      ],
+    });
+  }
 }
 
 // ─── Get signer contract (MetaMask required) ────────────────────────────────
@@ -56,8 +91,28 @@ export async function getSignerContract(): Promise<Contract> {
   if (typeof window === "undefined" || !window.ethereum) {
     throw new Error("MetaMask is not installed");
   }
+  await ensureHardhatNetwork();
   const provider = new BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
+  return new Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+}
+
+export async function getAdminSignerContract(): Promise<Contract> {
+  if (typeof window === "undefined" || !window.ethereum) {
+    throw new Error("MetaMask is not installed");
+  }
+
+  await ensureHardhatNetwork();
+  const provider = new BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const address = await signer.getAddress();
+
+  if (ADMIN_ADDRESS && address.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
+    throw new Error(
+      `Wrong MetaMask account. Switch to the admin wallet ${ADMIN_ADDRESS.slice(0, 6)}...${ADMIN_ADDRESS.slice(-4)}.`
+    );
+  }
+
   return new Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 }
 
@@ -66,6 +121,7 @@ export async function connectWallet(): Promise<string> {
   if (typeof window === "undefined" || !window.ethereum) {
     throw new Error("MetaMask is not installed. Please install it to continue.");
   }
+  await ensureHardhatNetwork();
   const provider = new BrowserProvider(window.ethereum);
   const accounts = await provider.send("eth_requestAccounts", []);
   return accounts[0] as string;

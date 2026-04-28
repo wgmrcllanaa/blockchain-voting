@@ -13,7 +13,7 @@ async function main() {
   const address = await contract.getAddress();
   console.log("✅ StudentVoting deployed to:", address);
   console.log("");
-  console.log("Add this to your frontend/.env.local:");
+  console.log("Add this to your votechain/.env.local:");
   console.log(`NEXT_PUBLIC_CONTRACT_ADDRESS=${address}`);
   console.log(`NEXT_PUBLIC_ADMIN_ADDRESS=${deployer.address}`);
 }

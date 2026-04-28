@@ -272,6 +272,14 @@ describe("StudentVoting", function () {
           .vote([presidentPositionId, secretaryPositionId], [candidate1Id])
       ).to.be.revertedWith("Array length mismatch");
     });
+
+    it("rejects duplicate positions in one ballot", async function () {
+      await expect(
+        contract
+          .connect(student1)
+          .vote([presidentPositionId, presidentPositionId], [candidate1Id, candidate2Id])
+      ).to.be.revertedWith("Duplicate position");
+    });
   });
 
   // ─────────────────────────────────────────────────────────────

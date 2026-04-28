@@ -161,8 +161,19 @@ contract StudentVoting {
     // ─────────────────────────────────────────────────────────────
 
     function openVoting() external onlyAdmin whenClosed {
-        require(_positions.length > 0, "No positions added");
-        require(_candidates.length > 0, "No candidates added");
+        uint256 activePositions = 0;
+        uint256 activeCandidates = 0;
+
+        for (uint256 i = 0; i < _positions.length; i++) {
+            if (_positions[i].active) activePositions++;
+        }
+
+        for (uint256 i = 0; i < _candidates.length; i++) {
+            if (_candidates[i].active) activeCandidates++;
+        }
+
+        require(activePositions > 0, "No active positions");
+        require(activeCandidates > 0, "No active candidates");
         votingOpen = true;
         emit VotingOpened();
     }
@@ -189,6 +200,10 @@ contract StudentVoting {
         require(positionIds.length > 0, "No votes provided");
 
         for (uint256 i = 0; i < positionIds.length; i++) {
+            for (uint256 k = i + 1; k < positionIds.length; k++) {
+                require(positionIds[i] != positionIds[k], "Duplicate position");
+            }
+
             uint256 pid = positionIds[i];
             uint256 cid = candidateIds[i];
 

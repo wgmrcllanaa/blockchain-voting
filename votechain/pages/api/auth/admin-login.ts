@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { createAdminSessionCookie } from "@/lib/adminAuth";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -15,6 +16,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const validPassword = process.env.ADMIN_PASSWORD;
 
   if (username === validUsername && password === validPassword) {
+    res.setHeader("Set-Cookie", createAdminSessionCookie(username));
     return res.status(200).json({ success: true });
   }
 

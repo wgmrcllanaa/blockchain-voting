@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/adminAuth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!requireAdmin(req, res)) return;
+
   if (req.method === "GET") {
     const students = await prisma.student.findMany({
       include: {
@@ -21,12 +24,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: false, error: "studentId, name, and email are required" });
     }
 
-    if (!email.endsWith("@adamson.edu.ph")) {
+    const normalizedEmail = String(email).toLowerCase().trim();
+
+    if (!normalizedEmail.endsWith("@adamson.edu.ph")) {
       return res.status(400).json({ success: false, error: "Only @adamson.edu.ph emails allowed" });
     }
 
     const existing = await prisma.student.findFirst({
-      where: { OR: [{ studentId: String(studentId) }, { email: email.toLowerCase() }] },
+      where: { OR: [{ studentId: String(studentId) }, { email: normalizedEmail }] },
     });
 
     if (existing) {
@@ -37,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         studentId: String(studentId),
         name: name.trim(),
-        email: email.toLowerCase().trim(),
+        email: normalizedEmail,
       },
     });
 

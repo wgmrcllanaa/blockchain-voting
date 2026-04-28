@@ -12,8 +12,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ success: false, error: "Student ID and email are required" });
   }
 
+  const normalizedEmail = String(email).toLowerCase().trim();
+
   // Validate email domain
-  if (!email.endsWith("@adamson.edu.ph")) {
+  if (!normalizedEmail.endsWith("@adamson.edu.ph")) {
     return res.status(400).json({
       success: false,
       error: "Only @adamson.edu.ph email addresses are accepted",
@@ -24,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const student = await prisma.student.findFirst({
     where: {
       studentId: String(studentId),
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
     },
     include: { registration: true },
   });

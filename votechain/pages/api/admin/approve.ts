@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/adminAuth";
+import { fundLocalWallet } from "@/lib/localFaucet";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!requireAdmin(req, res)) return;
+
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
@@ -34,11 +38,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     data: { status: "approved" },
   });
 
+  const faucet = await fundLocalWallet(updated.walletAddress).catch((error: unknown) => ({
+    funded: false,
+    reason: error instanceof Error ? error.message : "Failed to fund local wallet",
+  }));
+
   return res.status(200).json({
     success: true,
     data: {
       walletAddress: updated.walletAddress,
       status: updated.status,
+      faucet,
     },
   });
 }

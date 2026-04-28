@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
-import { getSignerContract, connectWallet } from "@/lib/contract";
+import AdminLogin from "@/components/admin/AdminLogin";
+import { ADMIN_ADDRESS, getAdminSignerContract, connectWallet } from "@/lib/contract";
 import { PendingRegistration } from "@/types";
 
 type Tab = "pending" | "students" | "positions" | "candidates" | "election" | "results";
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -27,38 +28,50 @@ export default function AdminPage() {
     }
   };
 
-  if (!authed) {
+  const handleLogout = async () => {
+    await axios.post("/api/auth/admin-logout");
+    setAuthed(false);
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data } = await axios.get("/api/auth/admin-status");
+        setAuthed(Boolean(data.data.authenticated));
+      } catch {
+        setAuthed(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  if (authed === null) {
     return (
       <>
         <Head><title>Admin Login — VoteChain</title></Head>
         <Navbar />
         <main className="min-h-screen bg-[#F7F8FB] flex items-center justify-center px-4">
-          <div className="card w-full max-w-sm">
-            <div className="card-header">
-              <h2 className="font-heading text-xl font-bold">Admin Login</h2>
-              <p className="text-blue-200 text-xs mt-0.5">ACOMSS VoteChain Administration</p>
-            </div>
-            <div className="card-body space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Username</label>
-                <input type="text" className="input-field" value={username} onChange={(e) => setUsername(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Password</label>
-                <input type="password" className="input-field" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
-              </div>
-              {loginError && <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-red-700 text-sm">⚠️ {loginError}</div>}
-              <button onClick={handleLogin} disabled={loginLoading} className="btn-primary w-full">
-                {loginLoading ? "Logging in..." : "Login"}
-              </button>
-            </div>
-          </div>
+          <div className="card p-8 text-center text-gray-500 text-sm">Checking admin session...</div>
         </main>
       </>
     );
   }
 
-  return <AdminDashboard onLogout={() => setAuthed(false)} />;
+  if (!authed) {
+    return (
+      <AdminLogin
+        username={username}
+        password={password}
+        loginError={loginError}
+        loginLoading={loginLoading}
+        onUsernameChange={setUsername}
+        onPasswordChange={setPassword}
+        onLogin={handleLogin}
+      />
+    );
+  }
+
+  return <AdminDashboard onLogout={handleLogout} />;
 }
 
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
@@ -78,6 +91,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const handleConnectAdminWallet = async () => {
     try {
       const address = await connectWallet();
+      if (ADMIN_ADDRESS && address.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
+        alert(`Wrong wallet. Switch MetaMask to the admin wallet ${ADMIN_ADDRESS.slice(0, 6)}...${ADMIN_ADDRESS.slice(-4)}.`);
+        return;
+      }
       setAdminWallet(address);
     } catch {
       alert("Failed to connect MetaMask.");
@@ -151,6 +168,7 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected">("pending");
+  const [notice, setNotice] = useState("");
 
   const fetchRegistrations = useCallback(async () => {
     setLoading(true);
@@ -167,14 +185,19 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
   const handleApprove = async (reg: PendingRegistration) => {
     if (!adminWallet) { alert("Please connect your admin wallet first."); return; }
     setActionLoading(reg.id);
+    setNotice("");
     try {
       // 1. Whitelist on-chain via admin MetaMask
-      const contract = await getSignerContract();
+      const contract = await getAdminSignerContract();
       const tx = await contract.whitelist(reg.walletAddress);
       await tx.wait();
 
       // 2. Update DB
-      await axios.post("/api/admin/approve", { registrationId: reg.id });
+      const { data } = await axios.post("/api/admin/approve", { registrationId: reg.id });
+      const faucet = data.data?.faucet;
+      if (faucet?.funded) {
+        setNotice(`Approved and funded ${reg.student.name}'s wallet with ${faucet.amountEth} fake Hardhat ETH.`);
+      }
       await fetchRegistrations();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to approve.";
@@ -207,6 +230,11 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
         </div>
       </div>
       <div className="card-body">
+        {notice && (
+          <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-green-700 text-sm mb-4">
+            {notice}
+          </div>
+        )}
         {loading ? (
           <p className="text-gray-400 text-sm text-center py-6">Loading...</p>
         ) : registrations.length === 0 ? (
@@ -373,7 +401,7 @@ function PositionsTab({ adminWallet }: { adminWallet: string }) {
     if (!requireWallet() || !newName.trim()) return;
     setActionLoading(true);
     try {
-      const contract = await getSignerContract();
+      const contract = await getAdminSignerContract();
       const tx = await contract.addPosition(newName.trim());
       await tx.wait();
       setNewName("");
@@ -390,7 +418,7 @@ function PositionsTab({ adminWallet }: { adminWallet: string }) {
     if (!confirm("Remove this position?")) return;
     setActionLoading(true);
     try {
-      const contract = await getSignerContract();
+      const contract = await getAdminSignerContract();
       const tx = await contract.removePosition(BigInt(id));
       await tx.wait();
       await fetchPositions();
@@ -458,7 +486,7 @@ function CandidatesTab({ adminWallet }: { adminWallet: string }) {
     if (!requireWallet() || !newName.trim() || !newPositionId) return;
     setActionLoading(true);
     try {
-      const contract = await getSignerContract();
+      const contract = await getAdminSignerContract();
       const tx = await contract.addCandidate(newName.trim(), BigInt(newPositionId));
       await tx.wait();
       setNewName("");
@@ -475,7 +503,7 @@ function CandidatesTab({ adminWallet }: { adminWallet: string }) {
     if (!confirm("Remove this candidate?")) return;
     setActionLoading(true);
     try {
-      const contract = await getSignerContract();
+      const contract = await getAdminSignerContract();
       const tx = await contract.removeCandidate(BigInt(id));
       await tx.wait();
       await fetchData();
@@ -544,7 +572,7 @@ function ElectionTab({ adminWallet }: { adminWallet: string }) {
     if (!confirm("Open voting? Candidates and positions can no longer be changed.")) return;
     setActionLoading(true);
     try {
-      const contract = await getSignerContract();
+      const contract = await getAdminSignerContract();
       const tx = await contract.openVoting();
       await tx.wait();
       await fetchStatus();
@@ -560,7 +588,7 @@ function ElectionTab({ adminWallet }: { adminWallet: string }) {
     if (!confirm("Close voting? Results will become public.")) return;
     setActionLoading(true);
     try {
-      const contract = await getSignerContract();
+      const contract = await getAdminSignerContract();
       const tx = await contract.closeVoting();
       await tx.wait();
       await fetchStatus();

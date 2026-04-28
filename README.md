@@ -9,7 +9,8 @@ Secure blockchain voting system for the Adamson Computer Science Society.
 ```
 blockchain-voting/
 ├── blockchain/       ← Solidity contract + Hardhat
-└── votechain/        ← Next.js app (frontend + backend + Prisma)
+├── votechain/        ← Next.js app (frontend + backend + Prisma)
+└── frontend/         ← Archived starter app; not used by VoteChain
 ```
 
 ---
@@ -54,7 +55,12 @@ cd votechain
 cp .env.local.example .env.local
 ```
 
-Edit `.env.local` and update `DATABASE_URL`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD`.
+Edit `.env.local` and update `DATABASE_URL` if needed. The local demo admin login is:
+
+```env
+ADMIN_USERNAME="acomss"
+ADMIN_PASSWORD="acomss"
+```
 
 3. Run Prisma migrations and seed the database:
 
@@ -127,7 +133,7 @@ Open http://localhost:3000
 
 ### Admin Setup (do this first)
 1. Go to http://localhost:3000/admin
-2. Log in with your `ADMIN_USERNAME` and `ADMIN_PASSWORD`
+2. Log in with username `acomss` and password `acomss`
 3. Click **Connect Admin Wallet** → connect Account #0 in MetaMask
 4. Go to **Positions** tab → add positions (e.g. President, Secretary, etc.)
 5. Go to **Candidates** tab → add candidates for each position
@@ -158,7 +164,7 @@ Open http://localhost:3000
 
 ```bash
 cd blockchain-voting/blockchain
-npx hardhat test
+npm test
 ```
 
 Tests cover:
@@ -178,6 +184,7 @@ Tests cover:
 | `DATABASE_URL` | PostgreSQL connection string |
 | `ADMIN_USERNAME` | Admin login username |
 | `ADMIN_PASSWORD` | Admin login password |
+| `ADMIN_SESSION_SECRET` | Secret used to sign the admin session cookie |
 | `NEXT_PUBLIC_CONTRACT_ADDRESS` | Deployed contract address |
 | `NEXT_PUBLIC_ADMIN_ADDRESS` | Admin wallet address (Account #0) |
 | `NEXT_PUBLIC_CHAIN_ID` | `31337` for Hardhat localhost |
