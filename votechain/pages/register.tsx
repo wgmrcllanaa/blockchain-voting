@@ -232,7 +232,7 @@ export default function RegisterPage() {
                     <h3 className="font-heading text-2xl font-bold text-au-blue">Registration Submitted!</h3>
                     <p className="text-gray-500 text-sm mt-2">
                       Your wallet has been submitted for approval. The admin will review your registration
-                      shortly. Once approved, you can proceed to vote.
+                      shortly. Return to the voting page once your status is approved.
                     </p>
                   </div>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-left text-xs text-gray-500 space-y-1">
@@ -240,8 +240,8 @@ export default function RegisterPage() {
                     <p><span className="font-semibold">Wallet:</span> {walletAddress.slice(0, 10)}...{walletAddress.slice(-6)}</p>
                     <p><span className="font-semibold">Status:</span> <span className="badge-pending">Pending</span></p>
                   </div>
-                  <a href="/vote" className="btn-primary inline-block">
-                    Go to Voting Page →
+                  <a href="/" className="btn-primary inline-block">
+                    Back to Home
                   </a>
                 </div>
               )}

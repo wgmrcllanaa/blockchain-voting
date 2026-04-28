@@ -108,19 +108,19 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       <main className="min-h-screen bg-[#F7F8FB]">
         {/* Admin header */}
         <div className="bg-au-blue-dark border-b-4 border-au-gold px-6 py-4">
-          <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <div className="max-w-5xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="font-heading text-2xl font-bold text-white">Admin Panel</h1>
               <p className="text-blue-300 text-xs">ACOMSS 2026–2027 Elections</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {!adminWallet ? (
                 <button onClick={handleConnectAdminWallet} className="btn-gold text-sm py-2 px-4">
-                  🦊 Connect Admin Wallet
+                  Connect Admin Wallet
                 </button>
               ) : (
                 <div className="bg-white/10 rounded-lg px-3 py-1.5 text-xs text-au-gold font-mono">
-                  {adminWallet.slice(0, 6)}...{adminWallet.slice(-4)} ✓
+                  {adminWallet.slice(0, 6)}...{adminWallet.slice(-4)}
                 </div>
               )}
               <button onClick={onLogout} className="text-blue-300 hover:text-white text-sm transition-colors">
@@ -207,10 +207,15 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
     }
   };
 
-  const handleReject = async (id: number) => {
-    setActionLoading(id);
+  const handleReject = async (reg: PendingRegistration) => {
+    const confirmed = window.confirm(
+      `Reject ${reg.student.name}'s registration?\n\nStudent ID: ${reg.student.studentId}\nWallet: ${reg.walletAddress}\n\nThey will not be able to vote with this registration.`
+    );
+    if (!confirmed) return;
+
+    setActionLoading(reg.id);
     try {
-      await axios.post("/api/admin/reject", { registrationId: id });
+      await axios.post("/api/admin/reject", { registrationId: reg.id });
       await fetchRegistrations();
     } finally {
       setActionLoading(null);
@@ -259,15 +264,15 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
                         {actionLoading === reg.id ? "..." : "✓ Approve"}
                       </button>
                       <button
-                        onClick={() => handleReject(reg.id)}
+                        onClick={() => handleReject(reg)}
                         disabled={actionLoading === reg.id}
                         className="bg-red-50 border border-red-300 text-red-600 text-xs py-1.5 px-3 rounded-lg hover:bg-red-100 transition-colors"
                       >
-                        ✕ Reject
+                        Reject
                       </button>
                     </>
                   )}
-                  {reg.status === "approved" && <span className="badge-approved">Approved ✓</span>}
+                  {reg.status === "approved" && <span className="badge-approved">Approved</span>}
                   {reg.status === "rejected" && <span className="badge-rejected">Rejected</span>}
                 </div>
               </div>
@@ -415,7 +420,7 @@ function PositionsTab({ adminWallet }: { adminWallet: string }) {
 
   const handleRemove = async (id: string) => {
     if (!requireWallet()) return;
-    if (!confirm("Remove this position?")) return;
+    if (!confirm("Remove this position? This can affect the ballot structure and cannot be undone on-chain.")) return;
     setActionLoading(true);
     try {
       const contract = await getAdminSignerContract();
@@ -500,7 +505,7 @@ function CandidatesTab({ adminWallet }: { adminWallet: string }) {
 
   const handleRemove = async (id: string) => {
     if (!requireWallet()) return;
-    if (!confirm("Remove this candidate?")) return;
+    if (!confirm("Remove this candidate? This can affect the ballot and cannot be undone on-chain.")) return;
     setActionLoading(true);
     try {
       const contract = await getAdminSignerContract();
@@ -569,7 +574,7 @@ function ElectionTab({ adminWallet }: { adminWallet: string }) {
 
   const handleOpen = async () => {
     if (!requireWallet()) return;
-    if (!confirm("Open voting? Candidates and positions can no longer be changed.")) return;
+    if (!confirm("Open voting now? Students will be able to cast votes, and positions/candidates should be treated as locked.")) return;
     setActionLoading(true);
     try {
       const contract = await getAdminSignerContract();
@@ -585,7 +590,7 @@ function ElectionTab({ adminWallet }: { adminWallet: string }) {
 
   const handleClose = async () => {
     if (!requireWallet()) return;
-    if (!confirm("Close voting? Results will become public.")) return;
+    if (!confirm("Close voting now? Students will no longer be able to vote, and results will become public.")) return;
     setActionLoading(true);
     try {
       const contract = await getAdminSignerContract();

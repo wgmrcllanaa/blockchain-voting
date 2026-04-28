@@ -10,7 +10,8 @@ export default function CandidateCard({ candidate, isSelected, onSelect }: Candi
   return (
     <button
       onClick={() => onSelect(candidate.id)}
-      className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 focus:outline-none ${
+      aria-pressed={isSelected}
+      className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-au-gold/40 focus-visible:ring-offset-2 ${
         isSelected
           ? "border-au-gold bg-au-blue text-white shadow-lg scale-[1.02]"
           : "border-gray-200 bg-white hover:border-au-blue hover:shadow-md text-gray-800"

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { PositionUI, CandidateUI, BallotSelections } from "@/types";
 
 interface BallotReviewProps {
@@ -18,6 +19,8 @@ export default function BallotReview({
   isSubmitting,
 }: BallotReviewProps) {
   const skipped = positions.filter((p) => !selections[p.id]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const backButtonRef = useRef<HTMLButtonElement>(null);
 
   const getCandidateName = (positionId: string): string => {
     const candidateId = selections[positionId];
@@ -26,13 +29,64 @@ export default function BallotReview({
     return candidate?.name ?? "Unknown";
   };
 
+  useEffect(() => {
+    const previousActiveElement = document.activeElement as HTMLElement | null;
+    backButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !isSubmitting) {
+        onBack();
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialogRef.current) return;
+
+      const focusableElements = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) return;
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+      previousActiveElement?.focus();
+    };
+  }, [isSubmitting, onBack]);
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !isSubmitting) onBack();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ballot-review-title"
+        aria-describedby="ballot-review-description"
+        className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
-        <div className="bg-au-blue border-b-4 border-au-gold px-6 py-4 rounded-t-2xl">
-          <h2 className="font-heading text-2xl text-white font-bold">Review Your Ballot</h2>
-          <p className="text-blue-200 text-sm mt-1">
+        <div className="bg-au-blue border-b-4 border-au-gold px-6 py-4 rounded-t-lg">
+          <h2 id="ballot-review-title" className="font-heading text-2xl text-white font-bold">Review Your Ballot</h2>
+          <p id="ballot-review-description" className="text-blue-200 text-sm mt-1">
             Please confirm your selections before submitting to the blockchain.
           </p>
         </div>
@@ -42,7 +96,7 @@ export default function BallotReview({
           {skipped.length > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3">
               <p className="text-yellow-800 text-sm font-semibold">
-                ⚠️ You skipped {skipped.length} position{skipped.length > 1 ? "s" : ""}:
+                Partial ballot: you skipped {skipped.length} position{skipped.length > 1 ? "s" : ""}:
               </p>
               <ul className="mt-1 text-yellow-700 text-sm list-disc list-inside">
                 {skipped.map((p) => (
@@ -83,18 +137,19 @@ export default function BallotReview({
 
           {/* Notice */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-blue-700 text-xs">
-            🔒 Your vote will be permanently recorded on the blockchain. This action cannot be undone.
+            Your vote will be permanently recorded on the blockchain. This action cannot be undone.
           </div>
         </div>
 
         {/* Actions */}
         <div className="px-6 pb-6 flex gap-3">
           <button
+            ref={backButtonRef}
             onClick={onBack}
             disabled={isSubmitting}
             className="flex-1 btn-outline text-sm py-2.5"
           >
-            ← Go Back
+            Go Back
           </button>
           <button
             onClick={onConfirm}
@@ -110,7 +165,7 @@ export default function BallotReview({
                 Submitting...
               </>
             ) : (
-              "✓ Submit Vote"
+              skipped.length > 0 ? "Submit Partial Ballot" : "Submit Vote"
             )}
           </button>
         </div>

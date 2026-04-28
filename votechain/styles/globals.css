@@ -30,19 +30,19 @@ h1, h2, h3 {
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-au-blue text-white font-bold px-6 py-3 rounded-xl hover:bg-au-blue-mid transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center bg-au-blue text-white font-bold px-6 py-3 rounded-lg hover:bg-au-blue-mid transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-4 focus-visible:ring-au-gold/40 focus-visible:ring-offset-2;
   }
 
   .btn-gold {
-    @apply inline-flex items-center justify-center bg-au-gold text-au-blue-dark font-bold px-6 py-3 rounded-xl hover:bg-au-gold-light transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center bg-au-gold text-au-blue-dark font-bold px-6 py-3 rounded-lg hover:bg-au-gold-light transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-4 focus-visible:ring-au-gold/40 focus-visible:ring-offset-2;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center border-2 border-gray-200 text-gray-600 font-semibold px-6 py-3 rounded-xl hover:border-au-blue hover:text-au-blue transition duration-200;
+    @apply inline-flex items-center justify-center border-2 border-gray-200 text-gray-600 font-semibold px-6 py-3 rounded-lg hover:border-au-blue hover:text-au-blue transition duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-au-gold/40 focus-visible:ring-offset-2;
   }
 
   .card {
-    @apply bg-white rounded-2xl overflow-hidden border border-gray-200;
+    @apply bg-white rounded-lg overflow-hidden border border-gray-200;
     box-shadow: var(--shadow-card);
   }
 
@@ -55,7 +55,7 @@ h1, h2, h3 {
   }
 
   .input-field {
-    @apply w-full border border-gray-300 bg-gray-50 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:border-au-blue focus:bg-white transition;
+    @apply w-full border border-gray-300 bg-gray-50 rounded-lg px-4 py-3 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:border-au-blue focus:bg-white transition;
   }
 
   .badge-pending {

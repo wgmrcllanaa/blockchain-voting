@@ -57,7 +57,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile nav */}
-        <div className="flex md:hidden gap-1">
+        <div className="flex md:hidden gap-1 overflow-x-auto">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -71,6 +71,16 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/admin"
+            className={`px-2 py-1.5 rounded-md text-xs font-medium whitespace-nowrap ${
+              router.pathname === "/admin"
+                ? "bg-au-gold/15 text-au-gold"
+                : "text-white/70"
+            }`}
+          >
+            Admin
+          </Link>
         </div>
       </div>
     </nav>

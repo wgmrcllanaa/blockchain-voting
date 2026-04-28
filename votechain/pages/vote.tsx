@@ -39,7 +39,7 @@ export default function VotePage() {
       setCandidates(data.data.candidates);
       setStatus("ready");
     } catch {
-      setError("Failed to connect to the contract. Make sure Hardhat node is running.");
+      setError("Failed to connect to the contract. Make sure the Hardhat node is running and MetaMask is on Hardhat Local (Chain ID 31337).");
       setStatus("idle");
     }
   }, []);
@@ -208,7 +208,7 @@ export default function VotePage() {
               {/* Skipped warning banner */}
               {skippedPositions.length > 0 && Object.keys(selections).length > 0 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 text-yellow-700 text-sm">
-                  ⚠️ You haven&apos;t selected a candidate for:{" "}
+                  You&apos;re preparing a partial ballot. No candidate selected for:{" "}
                   <span className="font-semibold">
                     {skippedPositions.map((p) => p.name).join(", ")}
                   </span>
@@ -261,7 +261,7 @@ export default function VotePage() {
                   disabled={Object.keys(selections).length === 0}
                   className="btn-gold w-full text-base py-4 rounded-xl shadow-lg"
                 >
-                  Review Ballot ({Object.keys(selections).length}/{positions.length} selected) →
+                  {Object.keys(selections).length === positions.length ? "Review Ballot" : "Review Partial Ballot"} ({Object.keys(selections).length}/{positions.length} selected)
                 </button>
               </div>
             </div>
@@ -291,7 +291,7 @@ function StatusCard({
       <p className="text-gray-500 text-sm max-w-sm mx-auto">{desc}</p>
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm text-left">
-          ⚠️ {error}
+          {error}
         </div>
       )}
       {action && <div className="flex justify-center">{action}</div>}
