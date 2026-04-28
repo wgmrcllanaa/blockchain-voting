@@ -1,0 +1,74 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "@/lib/prisma";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
+
+  const { studentId, email } = req.body;
+
+  if (!studentId || !email) {
+    return res.status(400).json({ success: false, error: "Student ID and email are required" });
+  }
+
+  // Validate email domain
+  if (!email.endsWith("@adamson.edu.ph")) {
+    return res.status(400).json({
+      success: false,
+      error: "Only @adamson.edu.ph email addresses are accepted",
+    });
+  }
+
+  // Look up student in DB
+  const student = await prisma.student.findFirst({
+    where: {
+      studentId: String(studentId),
+      email: email.toLowerCase().trim(),
+    },
+    include: { registration: true },
+  });
+
+  if (!student) {
+    return res.status(404).json({
+      success: false,
+      error: "No student record found with that ID and email combination",
+    });
+  }
+
+  // Check if already registered
+  if (student.registration) {
+    const status = student.registration.status;
+    if (status === "pending") {
+      return res.status(409).json({
+        success: false,
+        error: "You have already submitted a registration. Please wait for admin approval.",
+        status: "pending",
+      });
+    }
+    if (status === "approved") {
+      return res.status(409).json({
+        success: false,
+        error: "Your wallet is already approved. You can proceed to vote.",
+        status: "approved",
+        walletAddress: student.registration.walletAddress,
+      });
+    }
+    if (status === "rejected") {
+      return res.status(409).json({
+        success: false,
+        error: "Your previous registration was rejected. Please contact the admin.",
+        status: "rejected",
+      });
+    }
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      studentId: student.studentId,
+      name: student.name,
+      email: student.email,
+    },
+  });
+}

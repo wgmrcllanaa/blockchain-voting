@@ -1,0 +1,48 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "@/lib/prisma";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === "GET") {
+    const students = await prisma.student.findMany({
+      include: {
+        registration: {
+          select: { walletAddress: true, status: true, createdAt: true },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    return res.status(200).json({ success: true, data: students });
+  }
+
+  if (req.method === "POST") {
+    const { studentId, name, email } = req.body;
+
+    if (!studentId || !name || !email) {
+      return res.status(400).json({ success: false, error: "studentId, name, and email are required" });
+    }
+
+    if (!email.endsWith("@adamson.edu.ph")) {
+      return res.status(400).json({ success: false, error: "Only @adamson.edu.ph emails allowed" });
+    }
+
+    const existing = await prisma.student.findFirst({
+      where: { OR: [{ studentId: String(studentId) }, { email: email.toLowerCase() }] },
+    });
+
+    if (existing) {
+      return res.status(409).json({ success: false, error: "Student ID or email already exists" });
+    }
+
+    const student = await prisma.student.create({
+      data: {
+        studentId: String(studentId),
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+      },
+    });
+
+    return res.status(201).json({ success: true, data: student });
+  }
+
+  return res.status(405).json({ success: false, error: "Method not allowed" });
+}
