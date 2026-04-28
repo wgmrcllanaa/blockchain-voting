@@ -21,7 +21,7 @@ This README is intentionally detailed. It is written for someone who may be new 
 5. [Fresh Install Checklist](#fresh-install-checklist)
 6. [Step 1: Open the Project](#step-1-open-the-project)
 7. [Step 2: Install Dependencies](#step-2-install-dependencies)
-8. [Step 3: Create a Supabase Project](#step-3-create-a-supabase-project)
+8. [Step 3: Set Up Supabase](#step-3-set-up-supabase)
 9. [Step 4: Configure Environment Variables](#step-4-configure-environment-variables)
 10. [Step 5: Create Database Tables and Seed Demo Students](#step-5-create-database-tables-and-seed-demo-students)
 11. [Step 6: Start the Local Blockchain](#step-6-start-the-local-blockchain)
@@ -175,10 +175,14 @@ cp .env.local .env
 
 Then edit `votechain/.env.local` and `votechain/.env` with your Supabase values.
 
+If you created a brand-new Supabase project, run:
+
 ```bash
 npm run db:migrate
 npm run db:seed
 ```
+
+If you were invited to an existing shared Supabase project, skip those two database commands unless the project owner tells you to run them.
 
 In a new terminal:
 
@@ -288,9 +292,18 @@ Good sign:
 
 If installation fails, read the last 10 to 20 lines of the error first. Most npm errors are caused by an unsupported Node version or a network problem.
 
-## Step 3: Create a Supabase Project
+## Step 3: Set Up Supabase
 
 The web app needs a Postgres database. Supabase provides that database.
+
+There are two ways to do this:
+
+| Situation | What to Do |
+|---|---|
+| You are starting from scratch | Follow [Option A: Create a New Supabase Project](#option-a-create-a-new-supabase-project). |
+| You were invited to an existing project | Follow [Option B: Join an Existing Supabase Project](#option-b-join-an-existing-supabase-project). |
+
+### Option A: Create a New Supabase Project
 
 1. Go to Supabase in your browser.
 2. Create a new project.
@@ -306,6 +319,82 @@ You need four values from Supabase:
 | Database direct connection string | `DIRECT_URL` |
 | Project URL | `NEXT_PUBLIC_SUPABASE_URL` |
 | Publishable anon key | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+
+### Option B: Join an Existing Supabase Project
+
+Use this option if the project owner invited you to the same Supabase project.
+
+#### For the Project Owner
+
+1. Open the Supabase project dashboard.
+2. Invite the intern as a team member or project collaborator.
+3. Tell the intern which Supabase project to open after accepting the invite.
+4. Give the intern the local env values they need through a private channel.
+
+The intern needs these values:
+
+```env
+DATABASE_URL="..."
+DIRECT_URL="..."
+NEXT_PUBLIC_SUPABASE_URL="..."
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="..."
+ADMIN_USERNAME="..."
+ADMIN_PASSWORD="..."
+ADMIN_SESSION_SECRET="..."
+```
+
+If the intern will run their own local Hardhat blockchain, they will create their own contract values later:
+
+```env
+NEXT_PUBLIC_CONTRACT_ADDRESS="0x"
+NEXT_PUBLIC_ADMIN_ADDRESS="0x"
+NEXT_PUBLIC_CHAIN_ID="31337"
+NEXT_PUBLIC_RPC_URL="http://127.0.0.1:8545"
+LOCAL_FAUCET_AMOUNT_ETH="10"
+```
+
+Important:
+
+- Do not send secrets in a public chat, public issue, or committed file.
+- Do not ask the intern to commit `.env` or `.env.local`.
+- If the shared Supabase database already has tables, the intern usually does not need to run migrations.
+
+#### For the Invited Intern
+
+1. Accept the Supabase invite from your email.
+2. Log in to Supabase.
+3. Open the project that the owner invited you to.
+4. Confirm you can see the project dashboard.
+5. Ask the owner for the local env values listed above.
+6. Create `votechain/.env.local` and `votechain/.env` from the template.
+7. Paste the shared Supabase values into both files.
+
+Commands:
+
+```bash
+cd votechain
+cp .env.local.example .env.local
+cp .env.local .env
+```
+
+Then edit:
+
+```text
+votechain/.env.local
+votechain/.env
+```
+
+Shared-project rule:
+
+- Do not run `npm run db:migrate` unless the project owner asks you to.
+- Do not run `npm run db:seed` unless the project owner asks you to.
+- Running migrations or seed scripts against a shared database can change data for everyone.
+
+Good signs:
+
+- Supabase dashboard opens for the shared project.
+- Your `.env.local` has the same `NEXT_PUBLIC_SUPABASE_URL` as the shared project.
+- The app can read existing students or registrations after you start it.
 
 ### Finding the Database URLs
 
@@ -407,6 +496,10 @@ LOCAL_FAUCET_AMOUNT_ETH="10"
 ## Step 5: Create Database Tables and Seed Demo Students
 
 Prisma uses `votechain/prisma/schema.prisma` to create database tables.
+
+If you are using a brand-new Supabase project, run the migration and seed commands below.
+
+If you were invited to an existing shared Supabase project, ask the project owner first. The tables may already exist, and running seed commands can add or update shared data.
 
 From `votechain/`, run:
 
