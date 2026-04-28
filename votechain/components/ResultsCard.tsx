@@ -1,4 +1,5 @@
 import { CandidateUI } from "@/types";
+import AppIcon from "@/components/AppIcon";
 
 interface ResultsCardProps {
   positionName: string;
@@ -26,7 +27,7 @@ export default function ResultsCard({ positionName, candidates }: ResultsCardPro
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {isWinner && (
-                    <span className="text-au-gold text-sm">🏆</span>
+                    <AppIcon name="trophy" className="h-4 w-4 text-au-gold" />
                   )}
                   <span
                     className={`text-sm font-semibold ${

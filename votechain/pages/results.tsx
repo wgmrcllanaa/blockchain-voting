@@ -3,6 +3,7 @@ import Head from "next/head";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
 import ResultsCard from "@/components/ResultsCard";
+import AppIcon from "@/components/AppIcon";
 import { PositionUI, CandidateUI } from "@/types";
 
 export default function ResultsPage() {
@@ -58,7 +59,9 @@ export default function ResultsPage() {
 
           {!loading && error && (
             <div className="card p-10 text-center space-y-4">
-              <div className="text-5xl">🏁</div>
+              <div className="flex justify-center">
+                <AppIcon name="race" className="h-12 w-12 text-au-blue" />
+              </div>
               <h2 className="font-heading text-2xl font-bold text-au-blue">Results Not Available</h2>
               <p className="text-gray-500 text-sm">{error}</p>
               <p className="text-gray-400 text-xs">
@@ -70,7 +73,7 @@ export default function ResultsPage() {
           {!loading && !error && positions.length > 0 && (
             <div className="space-y-5">
               <div className="bg-au-blue text-white rounded-xl px-5 py-4 flex items-center gap-3">
-                <span className="text-2xl">📊</span>
+                <AppIcon name="chart" className="h-7 w-7" />
                 <div>
                   <p className="font-semibold text-sm">Official Election Results</p>
                   <p className="text-blue-200 text-xs">

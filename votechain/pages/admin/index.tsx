@@ -3,6 +3,7 @@ import Head from "next/head";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
 import AdminLogin from "@/components/admin/AdminLogin";
+import AppIcon, { AppIconName } from "@/components/AppIcon";
 import { ADMIN_ADDRESS, getAdminSignerContract, connectWallet } from "@/lib/contract";
 import { PendingRegistration } from "@/types";
 
@@ -79,13 +80,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<Tab>("pending");
   const [adminWallet, setAdminWallet] = useState("");
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: "pending", label: "Pending", icon: "⏳" },
-    { id: "students", label: "Students", icon: "🎓" },
-    { id: "positions", label: "Positions", icon: "📋" },
-    { id: "candidates", label: "Candidates", icon: "👤" },
-    { id: "election", label: "Election", icon: "🗳️" },
-    { id: "results", label: "Results", icon: "📊" },
+  const tabs: { id: Tab; label: string; icon: AppIconName }[] = [
+    { id: "pending", label: "Pending", icon: "audit" },
+    { id: "students", label: "Students", icon: "graduation" },
+    { id: "positions", label: "Positions", icon: "audit" },
+    { id: "candidates", label: "Candidates", icon: "boy" },
+    { id: "election", label: "Election", icon: "ballot" },
+    { id: "results", label: "Results", icon: "chart" },
   ];
 
   const handleConnectAdminWallet = async () => {
@@ -143,7 +144,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                     : "text-gray-500 hover:text-au-blue hover:bg-gray-50"
                 }`}
               >
-                <span>{tab.icon}</span>
+                <AppIcon name={tab.icon} className="h-4 w-4" />
                 {tab.label}
               </button>
             ))}
@@ -265,7 +266,14 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
                         disabled={actionLoading === reg.id}
                         className="btn-primary text-xs py-1.5 px-3"
                       >
-                        {actionLoading === reg.id ? "..." : "✓ Approve"}
+                        {actionLoading === reg.id ? (
+                          "..."
+                        ) : (
+                          <span className="inline-flex items-center gap-1">
+                            <AppIcon name="check" className="h-3.5 w-3.5 text-white" />
+                            Approve
+                          </span>
+                        )}
                       </button>
                       <button
                         onClick={() => handleReject(reg)}
@@ -336,7 +344,12 @@ function StudentsTab() {
             <input className="input-field" placeholder="Full Name" value={newName} onChange={(e) => setNewName(e.target.value)} />
             <input className="input-field" placeholder="email@adamson.edu.ph" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
           </div>
-          {addError && <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-red-700 text-sm">⚠️ {addError}</div>}
+          {addError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-red-700 text-sm">
+              <AppIcon name="warning" className="mr-2 h-4 w-4 align-[-2px] text-red-600" />
+              {addError}
+            </div>
+          )}
           <button onClick={handleAdd} disabled={addLoading} className="btn-primary text-sm">
             {addLoading ? "Adding..." : "+ Add Student"}
           </button>
@@ -617,7 +630,13 @@ function ElectionTab({ adminWallet }: { adminWallet: string }) {
         ) : (
           <>
             <div className={`rounded-xl px-6 py-5 text-center border-2 ${votingOpen ? "bg-green-50 border-green-300" : "bg-gray-50 border-gray-200"}`}>
-              <div className="text-4xl mb-2">{votingOpen ? "🟢" : "🔴"}</div>
+              <div className="flex justify-center mb-3">
+                <span
+                  className={`h-5 w-5 rounded-full ${
+                    votingOpen ? "bg-green-500" : "bg-red-500"
+                  }`}
+                />
+              </div>
               <p className="font-heading text-2xl font-bold text-au-blue">
                 Voting is {votingOpen ? "OPEN" : "CLOSED"}
               </p>
@@ -691,7 +710,10 @@ function ResultsTab() {
                     <div key={c.id}>
                       <div className="flex justify-between text-xs mb-1">
                         <span className={`font-medium ${i === 0 && total > 0 ? "text-au-blue font-bold" : "text-gray-600"}`}>
-                          {i === 0 && total > 0 && "🏆 "}{c.name}
+                          {i === 0 && total > 0 && (
+                            <AppIcon name="trophy" className="mr-1.5 h-4 w-4 align-[-3px] text-au-gold" />
+                          )}
+                          {c.name}
                         </span>
                         <span className="text-gray-500">{c.voteCount} votes ({pct}%)</span>
                       </div>

@@ -3,6 +3,7 @@ import Head from "next/head";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
 import StepBar from "@/components/StepBar";
+import AppIcon from "@/components/AppIcon";
 import { connectWallet } from "@/lib/contract";
 
 const STEPS = [
@@ -165,7 +166,10 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-blue-700 text-sm">
-                    <p className="font-semibold mb-1">🦊 Connect your MetaMask wallet</p>
+                    <p className="font-semibold mb-1 flex items-center gap-2">
+                      <AppIcon name="metamask" className="h-5 w-5 text-au-blue" />
+                      Connect your MetaMask wallet
+                    </p>
                     <p className="text-xs text-blue-500">
                       Make sure MetaMask is installed and you are connected to the{" "}
                       <strong>Hardhat localhost network</strong> (Chain ID: 31337).
@@ -179,7 +183,14 @@ export default function RegisterPage() {
                     disabled={loading}
                     className="btn-gold w-full"
                   >
-                    {loading ? "Connecting..." : "🦊 Connect MetaMask"}
+                    {loading ? (
+                      "Connecting..."
+                    ) : (
+                      <span className="inline-flex items-center justify-center gap-2">
+                        <AppIcon name="metamask" className="h-5 w-5 text-au-blue-dark" />
+                        Connect MetaMask
+                      </span>
+                    )}
                   </button>
                 </div>
               )}
@@ -258,7 +269,8 @@ export default function RegisterPage() {
 function ErrorBox({ message }: { message: string }) {
   return (
     <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm">
-      ⚠️ {message}
+      <AppIcon name="warning" className="mr-2 h-4 w-4 align-[-2px] text-red-600" />
+      {message}
     </div>
   );
 }

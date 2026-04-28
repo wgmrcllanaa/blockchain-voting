@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import AppIcon, { AppIconName } from "@/components/AppIcon";
 
 export default function Home() {
   const builtWith = [
@@ -15,37 +16,37 @@ export default function Home() {
 
   const features = [
     {
-      icon: "🔒",
+      icon: "padlock" as AppIconName,
       tone: "bg-blue-50",
       title: "Identity-Gated Access",
       desc: "Only verified students with valid school credentials can proceed. No outsiders, no duplicates.",
     },
     {
-      icon: "🦊",
+      icon: "metamask" as AppIconName,
       tone: "bg-yellow-50",
       title: "Wallet-Based Voting",
       desc: "Your MetaMask wallet is linked to your student record. One student, one wallet, one vote.",
     },
     {
-      icon: "⛓",
+      icon: "link" as AppIconName,
       tone: "bg-green-50",
       title: "On-Chain Immutability",
       desc: "Votes are written to the smart contract and cannot be altered after submission.",
     },
     {
-      icon: "🚫",
+      icon: "ban" as AppIconName,
       tone: "bg-red-50",
       title: "Double-Vote Prevention",
       desc: "The contract enforces a strict one-wallet-one-vote rule at the blockchain level.",
     },
     {
-      icon: "📊",
+      icon: "chart" as AppIconName,
       tone: "bg-blue-50",
       title: "Transparent Results",
       desc: "Anyone can verify vote counts directly from the contract after the election closes.",
     },
     {
-      icon: "🛡️",
+      icon: "shield" as AppIconName,
       tone: "bg-gray-100",
       title: "Hybrid Architecture",
       desc: "Student data stays off-chain while wallet approvals and votes are handled on-chain.",
@@ -54,35 +55,35 @@ export default function Home() {
 
   const steps = [
     {
-      icon: "🪪",
+      icon: "id" as AppIconName,
       ring: "border-blue-200 bg-blue-50",
       step: "1",
       title: "Verify Identity",
       desc: "Enter your Student ID and school email. Your identity is checked against the ACOMSS registry.",
     },
     {
-      icon: "📧",
+      icon: "envelope" as AppIconName,
       ring: "border-yellow-200 bg-yellow-50",
       step: "2",
       title: "Submit Registration",
       desc: "Send your verified student details for admin review and approval.",
     },
     {
-      icon: "🦊",
+      icon: "metamask" as AppIconName,
       ring: "border-red-200 bg-red-50",
       step: "3",
       title: "Connect Wallet",
       desc: "Link your MetaMask wallet and sign a message to prove ownership.",
     },
     {
-      icon: "🗳️",
+      icon: "ballot" as AppIconName,
       ring: "border-green-200 bg-green-50",
       step: "4",
       title: "Cast Your Vote",
       desc: "Choose your candidates. Your whitelisted wallet submits a transaction to the smart contract.",
     },
     {
-      icon: "⛓",
+      icon: "link" as AppIconName,
       ring: "border-blue-200 bg-blue-50",
       step: "5",
       title: "Vote Confirmed",
@@ -108,7 +109,7 @@ export default function Home() {
             }}
           />
           <div className="relative max-w-4xl mx-auto px-6 py-20 sm:py-24 text-center w-full">
-            <div className="w-[88px] h-[88px] rounded-full border-4 border-au-gold/30 shadow-[0_0_0_8px_rgba(255,184,28,0.08)] flex items-center justify-center mx-auto mb-7 overflow-hidden">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-au-gold/30 shadow-[0_0_0_8px_rgba(255,184,28,0.08)] flex items-center justify-center mx-auto mb-7 overflow-hidden">
               <img
                 src="/acomss-logo.jpg"
                 alt="ACOMSS logo"
@@ -187,12 +188,10 @@ export default function Home() {
             {steps.map((s, index) => (
               <div key={s.step} className="relative text-center">
                 {index < steps.length - 1 && (
-                  <span className="hidden sm:block absolute left-[calc(50%+44px)] top-10 text-gray-300 text-2xl">
-                    ›
-                  </span>
+                  <span className="hidden sm:block absolute left-[calc(50%+44px)] right-[calc(-50%+44px)] top-10 h-px bg-gray-200" />
                 )}
-                <div className={`w-20 h-20 rounded-full border-2 ${s.ring} text-2xl flex items-center justify-center mx-auto mb-4`}>
-                  {s.icon}
+                <div className={`w-20 h-20 rounded-full border-2 ${s.ring} flex items-center justify-center mx-auto mb-4`}>
+                  <AppIcon name={s.icon} className="h-9 w-9 text-au-blue" />
                 </div>
                 <div className="w-7 h-7 rounded-full bg-au-gold text-au-blue-dark text-xs font-extrabold flex items-center justify-center mx-auto mb-3">
                   {s.step}
@@ -215,8 +214,8 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((f) => (
               <div key={f.title} className="card p-8 transition duration-200 hover:-translate-y-1">
-                <div className={`w-14 h-14 rounded-xl ${f.tone} text-2xl flex items-center justify-center mb-6`}>
-                  {f.icon}
+                <div className={`w-14 h-14 rounded-xl ${f.tone} flex items-center justify-center mb-6`}>
+                  <AppIcon name={f.icon} className="h-7 w-7 text-au-blue" />
                 </div>
                 <h3 className="font-bold text-[#0E1330] text-lg mb-3">{f.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>

@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "@/components/Navbar";
 import CandidateCard from "@/components/CandidateCard";
 import BallotReview from "@/components/BallotReview";
+import AppIcon, { AppIconName } from "@/components/AppIcon";
 import { connectWallet, getSignerContract, getReadOnlyContract } from "@/lib/contract";
 import { PositionUI, CandidateUI, BallotSelections } from "@/types";
 
@@ -127,7 +128,7 @@ export default function VotePage() {
           {/* ── Not connected ── */}
           {(status === "idle" || status === "not_connected") && (
             <StatusCard
-              icon="🦊"
+              icon="metamask"
               title="Connect Your Wallet"
               desc="Connect your whitelisted MetaMask wallet to access the ballot."
               action={<button onClick={handleConnect} className="btn-gold">Connect MetaMask</button>}
@@ -137,13 +138,13 @@ export default function VotePage() {
 
           {/* ── Checking ── */}
           {status === "checking" && (
-            <StatusCard icon="⏳" title="Checking eligibility..." desc="Verifying your wallet on the blockchain." />
+            <StatusCard icon="audit" title="Checking eligibility..." desc="Verifying your wallet on the blockchain." />
           )}
 
           {/* ── Not whitelisted ── */}
           {status === "not_whitelisted" && (
             <StatusCard
-              icon="🔒"
+              icon="padlock"
               title="Wallet Not Approved"
               desc={`Your wallet (${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}) is not on the whitelist. Please register first and wait for admin approval.`}
               action={<a href="/register" className="btn-primary inline-block">Go to Registration</a>}
@@ -154,7 +155,7 @@ export default function VotePage() {
           {/* ── Already voted ── */}
           {status === "already_voted" && (
             <StatusCard
-              icon="✅"
+              icon="check"
               title="You Have Already Voted"
               desc="Your vote has been recorded on the blockchain. Thank you for participating!"
               action={<a href="/results" className="btn-primary inline-block">View Results</a>}
@@ -165,7 +166,7 @@ export default function VotePage() {
           {/* ── Voting closed ── */}
           {status === "voting_closed" && (
             <StatusCard
-              icon="🏁"
+              icon="race"
               title="Voting is Closed"
               desc="The election has ended. Check the results page to see the winners."
               action={<a href="/results" className="btn-primary inline-block">View Results</a>}
@@ -175,7 +176,7 @@ export default function VotePage() {
           {/* ── Success ── */}
           {status === "success" && (
             <StatusCard
-              icon="🎉"
+              icon="party"
               title="Vote Submitted Successfully!"
               desc="Your vote has been permanently recorded on the blockchain."
               variant="success"
@@ -202,7 +203,10 @@ export default function VotePage() {
                 <span className="text-xs font-mono font-semibold text-au-blue">
                   {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
                 </span>
-                <span className="ml-auto badge-approved">Whitelisted ✓</span>
+                <span className="ml-auto badge-approved inline-flex items-center gap-1">
+                  <AppIcon name="check" className="h-3.5 w-3.5 text-green-700" />
+                  Whitelisted
+                </span>
               </div>
 
               {/* Skipped warning banner */}
@@ -225,7 +229,10 @@ export default function VotePage() {
                     <div className="card-header flex items-center justify-between">
                       <h3 className="font-heading text-lg font-bold">{position.name}</h3>
                       {selections[position.id] ? (
-                        <span className="badge-approved text-xs">Selected ✓</span>
+                        <span className="badge-approved text-xs inline-flex items-center gap-1">
+                          <AppIcon name="check" className="h-3.5 w-3.5 text-green-700" />
+                          Selected
+                        </span>
                       ) : (
                         <span className="badge-pending text-xs">Not selected</span>
                       )}
@@ -250,7 +257,8 @@ export default function VotePage() {
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-700 text-sm">
-                  ⚠️ {error}
+                  <AppIcon name="warning" className="mr-2 h-4 w-4 align-[-2px] text-red-600" />
+                  {error}
                 </div>
               )}
 
@@ -276,7 +284,7 @@ export default function VotePage() {
 function StatusCard({
   icon, title, desc, action, error, variant,
 }: {
-  icon: string;
+  icon: AppIconName;
   title: string;
   desc: string;
   action?: React.ReactNode;
@@ -286,7 +294,9 @@ function StatusCard({
   const bg = variant === "success" ? "bg-green-50 border-green-200" : variant === "warning" ? "bg-yellow-50 border-yellow-200" : "bg-white border-gray-200";
   return (
     <div className={`card border ${bg} text-center p-10 space-y-4`}>
-      <div className="text-5xl">{icon}</div>
+      <div className="flex justify-center">
+        <AppIcon name={icon} className="h-12 w-12 text-au-blue" />
+      </div>
       <h2 className="font-heading text-2xl font-bold text-au-blue">{title}</h2>
       <p className="text-gray-500 text-sm max-w-sm mx-auto">{desc}</p>
       {error && (
