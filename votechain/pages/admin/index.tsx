@@ -189,14 +189,18 @@ function PendingTab({ adminWallet }: { adminWallet: string }) {
     try {
       // 1. Whitelist on-chain via admin MetaMask
       const contract = await getAdminSignerContract();
-      const tx = await contract.whitelist(reg.walletAddress);
-      await tx.wait();
+      const alreadyWhitelisted = await contract.isWhitelisted(reg.walletAddress);
+      if (!alreadyWhitelisted) {
+        const tx = await contract.whitelist(reg.walletAddress);
+        await tx.wait();
+      }
 
       // 2. Update DB
       const { data } = await axios.post("/api/admin/approve", { registrationId: reg.id });
       const faucet = data.data?.faucet;
       if (faucet?.funded) {
-        setNotice(`Approved and funded ${reg.student.name}'s wallet with ${faucet.amountEth} fake Hardhat ETH.`);
+        const chainStatus = alreadyWhitelisted ? "Wallet was already whitelisted. " : "";
+        setNotice(`${chainStatus}Approved and funded ${reg.student.name}'s wallet with ${faucet.amountEth} fake Hardhat ETH.`);
       }
       await fetchRegistrations();
     } catch (err: unknown) {

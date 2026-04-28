@@ -4,12 +4,13 @@ import Navbar from "@/components/Navbar";
 
 export default function Home() {
   const builtWith = [
-    "⚡ Next.js",
-    "🟢 Node.js",
-    "🐘 PostgreSQL",
-    "🦊 MetaMask",
-    "⛓ Solidity",
-    "🔐 Hardhat",
+    { name: "Next.js", logo: "/logos/nextjs.svg", className: "h-5 w-5" },
+    { name: "Node.js", logo: "/logos/nodejs.svg", className: "h-5 w-auto max-w-[28px]" },
+    { name: "Supabase", logo: "/logos/supabase.svg", className: "h-5 w-5" },
+    { name: "PostgreSQL", logo: "/logos/postgresql.svg", className: "h-5 w-5" },
+    { name: "MetaMask", logo: "/logos/metamask.svg", className: "h-5 w-5" },
+    { name: "Solidity", logo: "/logos/solidity.svg", className: "h-5 w-5" },
+    { name: "Hardhat", logo: "/logos/hardhat.svg", className: "h-5 w-5" },
   ];
 
   const features = [
@@ -98,7 +99,7 @@ export default function Home() {
 
       <main className="min-h-screen bg-[#F7F8FB]">
         {/* Hero */}
-        <section className="bg-au-blue-dark relative overflow-hidden">
+        <section className="bg-au-blue-dark relative min-h-[calc(100vh-4rem)] overflow-hidden flex items-center">
           <div
             className="absolute inset-0"
             style={{
@@ -106,9 +107,13 @@ export default function Home() {
                 "radial-gradient(circle at 20% 50%, rgba(255,184,28,0.07) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(0,71,187,0.35) 0%, transparent 45%), repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px)",
             }}
           />
-          <div className="relative max-w-4xl mx-auto px-6 py-20 sm:py-24 text-center">
-            <div className="w-[88px] h-[88px] rounded-full bg-au-gold text-au-blue-dark border-4 border-au-gold/30 shadow-[0_0_0_8px_rgba(255,184,28,0.08)] flex items-center justify-center mx-auto mb-7 font-heading text-3xl font-bold">
-              AU
+          <div className="relative max-w-4xl mx-auto px-6 py-20 sm:py-24 text-center w-full">
+            <div className="w-[88px] h-[88px] rounded-full border-4 border-au-gold/30 shadow-[0_0_0_8px_rgba(255,184,28,0.08)] flex items-center justify-center mx-auto mb-7 overflow-hidden">
+              <img
+                src="/acomss-logo.jpg"
+                alt="ACOMSS logo"
+                className="h-full w-full scale-[1.55] object-cover"
+              />
             </div>
             <p className="text-au-gold text-[11px] font-bold tracking-[0.28em] uppercase mb-4">
               Adamson Computer Science Society
@@ -154,8 +159,17 @@ export default function Home() {
               Built With
             </span>
             {builtWith.map((item) => (
-              <span key={item} className="text-[#0E1330] text-sm sm:text-base font-semibold">
-                {item}
+              <span
+                key={item.name}
+                className="inline-flex items-center gap-2 text-[#0E1330] text-sm sm:text-base font-semibold"
+              >
+                <img
+                  src={item.logo}
+                  alt=""
+                  className={`${item.className} max-w-[118px] object-contain`}
+                  aria-hidden="true"
+                />
+                {item.name}
               </span>
             ))}
           </div>

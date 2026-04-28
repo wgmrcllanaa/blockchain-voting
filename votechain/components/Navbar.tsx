@@ -16,8 +16,12 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 leading-tight">
-          <span className="h-10 w-10 rounded-full bg-au-gold text-au-blue-dark font-heading font-bold text-sm flex items-center justify-center shadow-[0_0_0_4px_rgba(255,184,28,0.12)]">
-            AU
+          <span className="h-10 w-10 rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_0_4px_rgba(255,184,28,0.12)]">
+            <img
+              src="/acomss-logo.jpg"
+              alt="ACOMSS logo"
+              className="h-full w-full scale-[1.55] object-cover"
+            />
           </span>
           <span className="flex flex-col">
             <span className="text-white font-heading font-semibold text-lg tracking-wide">

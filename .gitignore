@@ -22,12 +22,21 @@ blockchain/Library/
 
 # Logs and local caches
 .npm/
+.turbo/
+coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+.eslintcache
 .DS_Store
 *.tsbuildinfo
 
 # Deployment tooling
 .vercel/
+
+# Local agent skills/tooling
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
